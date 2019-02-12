@@ -94,16 +94,20 @@ public class PocketSphinxActivity extends Activity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
+        ((TextView) findViewById(R.id.connection_status)).setText("Not Connected");
+
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
         new SetupTask(this).execute();
     }
 
+    //this is for loading the language, which takes a while, so it runs in a different thread
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
         WeakReference<PocketSphinxActivity> activityReference;
         SetupTask(PocketSphinxActivity activity) {
             this.activityReference = new WeakReference<>(activity);
         }
+
         @Override
         protected Exception doInBackground(Void... params) {
             try {
@@ -124,6 +128,10 @@ public class PocketSphinxActivity extends Activity implements
                 activityReference.get().switchSearch(KWS_SEARCH);
             }
         }
+    }
+
+    public void sendToDrone(String s){
+
     }
 
     @Override
@@ -151,6 +159,11 @@ public class PocketSphinxActivity extends Activity implements
             recognizer.shutdown();
         }
     }
+
+    /*********************
+     * Recognizer Overridden methods
+     *
+     */
 
     /**
      * In partial result we get quick updates about current hypothesis. In
@@ -223,13 +236,10 @@ public class PocketSphinxActivity extends Activity implements
     private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
-
         recognizer = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                 .setDictionary(new File(assetsDir, "TAR_Lang.dict"))
-
                 .setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
-
                 .getRecognizer();
         recognizer.addListener(this);
 
@@ -244,15 +254,15 @@ public class PocketSphinxActivity extends Activity implements
         File menuGrammar = new File(assetsDir, "menu.gram");
         recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
 
-        // Create grammar-based search for digit recognition
+//         Create grammar-based search for digit recognition
 //        File digitsGrammar = new File(assetsDir, "digits.gram");
 //        recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
-
-        // Create language model search
+//
+//         Create language model search
 //        File languageModel = new File(assetsDir, "weather.dmp");
 //        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
-
-        // Phonetic search
+//
+//         Phonetic search
 //        File phoneticModel = new File(assetsDir, "en-phone.dmp");
 //        recognizer.addAllphoneSearch(PHONE_SEARCH, phoneticModel);
     }
