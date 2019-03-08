@@ -1,18 +1,18 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    repositories {
-        jcenter()
-        google()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
+    apply from: "https://github.com/rosjava/android_core/raw/kinetic/buildscript.gradle"
+}
+
+subprojects {
+    if (!name.startsWith('aar')) {
+        apply plugin: 'ros-android'
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
 }
