@@ -8,7 +8,7 @@ import org.ros.node.topic.Publisher;
 
 public class RosPublisher extends AbstractNodeMain {
 
-    private Publisher<std_msgs.String> publisher;
+    private static Publisher<std_msgs.String> publisher;
 
     RosPublisher() {
 
@@ -16,34 +16,15 @@ public class RosPublisher extends AbstractNodeMain {
 
     @Override
     public GraphName getDefaultNodeName() {
-        return GraphName.of("rosjava_tutorial_pubsub/talker");
+        return GraphName.of("TARApp/Publisher");
     }
 
     @Override
     public void onStart(final ConnectedNode connectedNode) {
-        publisher = connectedNode.newPublisher("chatter", std_msgs.String._TYPE);
-        // This CancellableLoop will be canceled automatically when the node shuts
-        // down.
-        connectedNode.executeCancellableLoop(new CancellableLoop() {
-            private int sequenceNumber;
-
-            @Override
-            protected void setup() {
-                sequenceNumber = 0;
-            }
-
-            @Override
-            protected void loop() throws InterruptedException {
-                std_msgs.String str = publisher.newMessage();
-                str.setData("Hello world! " + sequenceNumber);
-                publisher.publish(str);
-                sequenceNumber++;
-                Thread.sleep(1000);
-            }
-        });
+        publisher = connectedNode.newPublisher("Android", std_msgs.String._TYPE);
     }
 
-    public void publish(String message) {
+    static void publish(String message) {
         std_msgs.String toPublish = publisher.newMessage();
         toPublish.setData(message);
         publisher.publish(toPublish);

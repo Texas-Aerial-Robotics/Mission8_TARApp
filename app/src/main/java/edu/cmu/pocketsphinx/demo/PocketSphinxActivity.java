@@ -40,7 +40,9 @@ import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
@@ -48,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Assets;
@@ -78,21 +81,28 @@ public class PocketSphinxActivity extends RosActivity implements
     private HashMap<String, Integer> captions;
 
     public PocketSphinxActivity() {
-        super("test", "umer", URI.create("http://192.168.1.24:11311"));
+        super("test", "umer");
+//        super("test", "umer", URI.create("http://192.168.1.24:11311"));
     }
 
-//    @Override
-//    public void startMasterChooser() {
-//        URI uri;
-//        try {
-//            uri = new URI("http://192.168.1.24:11311/");
-//        } catch (URISyntaxException e) {
-//            throw new RosRuntimeException(e);
-//        }
-//
-//        nodeMainExecutorService.setMasterUri(uri);
-//        PocketSphinxActivity.this.init(nodeMainExecutorService);
-//    }
+    @Override
+    public void startMasterChooser() {
+        URI uri;
+        try {
+            uri = new URI("http://192.168.1.24:11311/");
+        } catch (URISyntaxException e) {
+            throw new RosRuntimeException(e);
+        }
+
+        nodeMainExecutorService.setMasterUri(uri);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                PocketSphinxActivity.this.init(nodeMainExecutorService);
+                return null;
+            }
+        }.execute();
+    }
 
     @Override
     public void onCreate(Bundle state) {
@@ -181,7 +191,8 @@ public class PocketSphinxActivity extends RosActivity implements
     protected void init(NodeMainExecutor nodeMainExecutor) {
         RosPublisher talkernode = new RosPublisher();
 
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
+                InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration.setMasterUri(getMasterUri());
 
         nodeMainExecutor.execute(talkernode, nodeConfiguration);
@@ -232,7 +243,7 @@ public class PocketSphinxActivity extends RosActivity implements
             String text = hypothesis.getHypstr();
             makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             if (text.equals("QRcode")) {
-                new RosPublisher();
+                RosPublisher.publish(text);
             }
         }
     }
