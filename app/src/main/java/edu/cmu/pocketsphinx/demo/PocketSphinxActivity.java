@@ -31,7 +31,6 @@
 package edu.cmu.pocketsphinx.demo;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,9 +40,14 @@ import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.ros.android.RosActivity;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMainExecutor;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.URI;
 import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Assets;
@@ -54,7 +58,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
 
-public class PocketSphinxActivity extends Activity implements
+public class PocketSphinxActivity extends RosActivity implements
         RecognitionListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
@@ -72,6 +76,23 @@ public class PocketSphinxActivity extends Activity implements
 
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
+
+    public PocketSphinxActivity() {
+        super("test", "umer", URI.create("http://192.168.1.24:11311"));
+    }
+
+//    @Override
+//    public void startMasterChooser() {
+//        URI uri;
+//        try {
+//            uri = new URI("http://192.168.1.24:11311/");
+//        } catch (URISyntaxException e) {
+//            throw new RosRuntimeException(e);
+//        }
+//
+//        nodeMainExecutorService.setMasterUri(uri);
+//        PocketSphinxActivity.this.init(nodeMainExecutorService);
+//    }
 
     @Override
     public void onCreate(Bundle state) {
@@ -130,10 +151,6 @@ public class PocketSphinxActivity extends Activity implements
         }
     }
 
-    public void sendToDrone(String s){
-
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull  int[] grantResults) {
@@ -158,6 +175,16 @@ public class PocketSphinxActivity extends Activity implements
             recognizer.cancel();
             recognizer.shutdown();
         }
+    }
+
+    @Override
+    protected void init(NodeMainExecutor nodeMainExecutor) {
+        RosPublisher talkernode = new RosPublisher();
+
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
+        nodeConfiguration.setMasterUri(getMasterUri());
+
+        nodeMainExecutor.execute(talkernode, nodeConfiguration);
     }
 
     /*********************
@@ -204,6 +231,9 @@ public class PocketSphinxActivity extends Activity implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+            if (text.equals("QRcode")) {
+                new RosPublisher();
+            }
         }
     }
 

@@ -1,62 +1,29 @@
 package edu.cmu.pocketsphinx.demo;
 
+import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
-import org.ros.node.topic.SubscriberListener;
-
-import java.util.concurrent.TimeUnit;
 
 
-public class RosSubscriber implements Subscriber {
+public class RosSubscriber extends AbstractNodeMain {
 
     @Override
-    public void addMessageListener(MessageListener messageListener, int i) {
-
+    public GraphName getDefaultNodeName() {
+        return GraphName.of("rosjava_tutorial_pubsub/listener");
     }
 
     @Override
-    public void addMessageListener(MessageListener messageListener) {
-
-    }
-
-    @Override
-    public boolean removeMessageListener(MessageListener messageListener) {
-        return false;
-    }
-
-    @Override
-    public void removeAllMessageListeners() {
-
-    }
-
-    @Override
-    public void shutdown(long l, TimeUnit timeUnit) {
-
-    }
-
-    @Override
-    public void shutdown() {
-
-    }
-
-    @Override
-    public void addSubscriberListener(SubscriberListener subscriberListener) {
-
-    }
-
-    @Override
-    public boolean getLatchMode() {
-        return false;
-    }
-
-    @Override
-    public GraphName getTopicName() {
-        return null;
-    }
-
-    @Override
-    public java.lang.String getTopicMessageType() {
-        return null;
+    public void onStart(ConnectedNode connectedNode) {
+        final Log log = connectedNode.getLog();
+        Subscriber<std_msgs.String> subscriber = connectedNode.newSubscriber("chatter", std_msgs.String._TYPE);
+        subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
+            @Override
+            public void onNewMessage(std_msgs.String message) {
+                log.info("I heard: \"" + message.getData() + "\"");
+            }
+        });
     }
 }
