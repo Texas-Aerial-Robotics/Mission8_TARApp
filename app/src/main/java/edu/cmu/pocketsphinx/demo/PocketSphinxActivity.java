@@ -82,7 +82,6 @@ public class PocketSphinxActivity extends RosActivity implements
 
     public PocketSphinxActivity() {
         super("test", "umer");
-//        super("test", "umer", URI.create("http://192.168.1.24:11311"));
     }
 
     @Override
@@ -112,9 +111,6 @@ public class PocketSphinxActivity extends RosActivity implements
         captions = new HashMap<>();
         captions.put(KWS_SEARCH, R.string.kws_caption);
         captions.put(MENU_SEARCH, R.string.menu_caption);
-//        captions.put(DIGITS_SEARCH, R.string.digits_caption);
-//        captions.put(PHONE_SEARCH, R.string.phone_caption);
-//        captions.put(FORECAST_SEARCH, R.string.forecast_caption);
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
@@ -125,7 +121,6 @@ public class PocketSphinxActivity extends RosActivity implements
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
-        ((TextView) findViewById(R.id.connection_status)).setText("Not Connected");
 
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
@@ -189,13 +184,16 @@ public class PocketSphinxActivity extends RosActivity implements
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        RosPublisher talkernode = new RosPublisher();
+        RosPublisher publishNode = new RosPublisher();
+        RosSubscriber subscribeNode = new RosSubscriber();
 
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
                 InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration.setMasterUri(getMasterUri());
 
-        nodeMainExecutor.execute(talkernode, nodeConfiguration);
+        nodeMainExecutor.execute(publishNode, nodeConfiguration);
+        nodeMainExecutor.execute(subscribeNode, nodeConfiguration);
+        ((TextView) findViewById(R.id.connection_status)).setText("Connected");
     }
 
     /*********************
@@ -218,15 +216,6 @@ public class PocketSphinxActivity extends RosActivity implements
             case KEYPHRASE:
                 switchSearch(MENU_SEARCH);
                 break;
-//            case DIGITS_SEARCH:
-//                switchSearch(DIGITS_SEARCH);
-//                break;
-//            case PHONE_SEARCH:
-//                switchSearch(PHONE_SEARCH);
-//                break;
-//            case FORECAST_SEARCH:
-//                switchSearch(FORECAST_SEARCH);
-//                break;
             default:
                 ((TextView) findViewById(R.id.result_text)).setText(text);
                 break;
@@ -294,18 +283,6 @@ public class PocketSphinxActivity extends RosActivity implements
         // Create grammar-based search for selection between demos
         File menuGrammar = new File(assetsDir, "menu.gram");
         recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-
-//         Create grammar-based search for digit recognition
-//        File digitsGrammar = new File(assetsDir, "digits.gram");
-//        recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
-//
-//         Create language model search
-//        File languageModel = new File(assetsDir, "weather.dmp");
-//        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
-//
-//         Phonetic search
-//        File phoneticModel = new File(assetsDir, "en-phone.dmp");
-//        recognizer.addAllphoneSearch(PHONE_SEARCH, phoneticModel);
     }
 
     @Override

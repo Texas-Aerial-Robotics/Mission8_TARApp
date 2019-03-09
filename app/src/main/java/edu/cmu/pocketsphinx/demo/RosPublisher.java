@@ -1,6 +1,7 @@
 package edu.cmu.pocketsphinx.demo;
 
-import org.ros.concurrent.CancellableLoop;
+import android.util.Log;
+
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -25,8 +26,13 @@ public class RosPublisher extends AbstractNodeMain {
     }
 
     static void publish(String message) {
-        std_msgs.String toPublish = publisher.newMessage();
-        toPublish.setData(message);
-        publisher.publish(toPublish);
+        try {
+            std_msgs.String toPublish = publisher.newMessage();
+            toPublish.setData(message);
+            publisher.publish(toPublish);
+        }
+        catch (NullPointerException ignored) {
+            Log.i("Failure","Failed to publish");
+        }
     }
 }
