@@ -242,7 +242,7 @@ public class PocketSphinxActivity extends RosActivity implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-            if (text.equals("QRcode")) {
+            if (text.equals("QRcode") || text.equals("takeoff") || text.equals("land")) {
                 RosPublisher.publish(text);
             }
         }

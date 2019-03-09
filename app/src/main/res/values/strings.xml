@@ -4,6 +4,6 @@
     <string name="app_name">Mission 8 App</string>
     
     <string name="kws_caption">To start demonstration say \"quad copter\".</string>
-    <string name="menu_caption">Say \"QRcode\" or \"takeoff\".</string>
+    <string name="menu_caption">Say \"QRcode\", \"land\", or \"takeoff\".</string>
 
 </resources>
