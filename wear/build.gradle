@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "edu.cmu.pocketsphinx.demo.wear"
+        applicationId "com.TexasAerialRobotics.Mission8_TARApp.wear"
         minSdkVersion 24
         targetSdkVersion 26
         versionCode 1

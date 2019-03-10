@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +53,8 @@ import org.ros.node.NodeMainExecutor;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -69,9 +72,6 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
 
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String KWS_SEARCH = "wakeup";
-//    private static final String FORECAST_SEARCH = "forecast";
-//    private static final String DIGITS_SEARCH = "digits";
-//    private static final String PHONE_SEARCH = "phones";
     private static final String MENU_SEARCH = "menu";
 
     /* Keyword we are looking for to activate menu */
@@ -93,6 +93,8 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
     @SuppressLint("StaticFieldLeak")
     @Override
     public void startMasterChooser() {
+        new checkPorts().execute();
+
         URI uri;
         try {
             uri = new URI("http://192.168.1.24:11311/");
@@ -325,5 +327,24 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
         super.onStop();
         Intent intent = new Intent(this, PocketSphinxAndRosActivity.class);
         startActivity(intent);
+    }
+
+    private static class checkPorts extends AsyncTask<Integer, Integer, Integer> {
+        checkPorts() {}
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            for (int subnet2 = 0; subnet2 < 4; subnet2++) {
+                for (int subnet = 0; subnet < 255; subnet++) {
+                    @SuppressLint("DefaultLocale") String server = String.format("192.168.%d.%d", subnet2, subnet);
+                    try (Socket socket = new Socket()) {
+                        socket.connect(new InetSocketAddress(server, 11311), 3);
+                        Log.i("Network","found ROS Node: " + server + " == " + socket.isConnected());
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            return 1;
+        }
     }
 }
