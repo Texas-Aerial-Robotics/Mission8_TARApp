@@ -12,7 +12,6 @@ public class RosPublisher extends AbstractNodeMain {
     private static Publisher<std_msgs.String> publisher;
 
     RosPublisher() {
-
     }
 
     @Override

@@ -21,6 +21,7 @@ public class RosSubscriber extends AbstractNodeMain {
         subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
             @Override
             public void onNewMessage(std_msgs.String message) {
+                PocketSphinxActivity.printToScreen(message.getData());
                 Log.i("Data from CVnode","I heard \"" + message.getData() + "\"");
             }
         });

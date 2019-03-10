@@ -31,12 +31,15 @@
 package edu.cmu.pocketsphinx.demo;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,10 +83,14 @@ public class PocketSphinxActivity extends RosActivity implements
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
 
+    @SuppressLint("StaticFieldLeak")
+    private static TextView textbox;
+
     public PocketSphinxActivity() {
-        super("test", "umer");
+        super("TARAndroidApp", "Running");
     }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void startMasterChooser() {
         URI uri;
@@ -125,6 +132,18 @@ public class PocketSphinxActivity extends RosActivity implements
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
         new SetupTask(this).execute();
+
+        textbox = findViewById(R.id.textbox);
+
+        // Sets screen to stay on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Sets screen to FULL BRIGHTNESS
+        /*
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = 1F;
+        getWindow().setAttributes(layout);
+        */
     }
 
     //this is for loading the language, which takes a while, so it runs in a different thread
@@ -196,10 +215,9 @@ public class PocketSphinxActivity extends RosActivity implements
         ((TextView) findViewById(R.id.connection_status)).setText("Connected");
     }
 
-    /*********************
-     * Recognizer Overridden methods
-     *
-     */
+    static void printToScreen(String text) {
+        textbox.setText(text);
+    }
 
     /**
      * In partial result we get quick updates about current hypothesis. In
@@ -293,5 +311,19 @@ public class PocketSphinxActivity extends RosActivity implements
     @Override
     public void onTimeout() {
         switchSearch(KWS_SEARCH);
+    }
+
+    /**
+     * If app is exited or leaves the screenview,
+     * kill the current microphone access, then restart the app.
+     * The reason for killing the microphone is so the audio doesn't get
+     * routed to the old app instance and follows to the new app instance.
+     */
+    @Override
+    public void onStop() {
+        onDestroy();
+        super.onStop();
+        Intent intent = new Intent(this, PocketSphinxActivity.class);
+        startActivity(intent);
     }
 }

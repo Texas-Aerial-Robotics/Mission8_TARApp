@@ -21,6 +21,14 @@
         android:layout_marginBottom="2pt"
         android:text="@string/textview" />
 
+    <TextView
+        android:id="@+id/textbox"
+        android:layout_width="138dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginBottom="2pt"
+        android:text="@string/textview" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

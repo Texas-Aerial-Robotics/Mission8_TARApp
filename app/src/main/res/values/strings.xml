@@ -5,6 +5,6 @@
     
     <string name="kws_caption">To start demonstration say \"quad copter\".</string>
     <string name="menu_caption">Say \"QRcode\", \"land\", or \"takeoff\".</string>
-    <string name="textview">TextView</string>
+    <string name="textview" />
 
 </resources>
