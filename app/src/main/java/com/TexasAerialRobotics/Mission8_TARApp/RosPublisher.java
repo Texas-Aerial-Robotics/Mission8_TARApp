@@ -1,4 +1,4 @@
-package edu.cmu.pocketsphinx.demo;
+package com.TexasAerialRobotics.Mission8_TARApp;
 
 import android.util.Log;
 

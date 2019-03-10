@@ -1,6 +1,7 @@
-package edu.cmu.pocketsphinx.demo.wear;
+package com.TexasAerialRobotics.Mission8_TARApp.wear;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -53,7 +54,7 @@ public class WearActivity extends Activity implements
         captions.put(PHONE_SEARCH, R.string.phone_caption);
         captions.put(FORECAST_SEARCH, R.string.forecast_caption);
         setContentView(R.layout.activity_main);
-        ((TextView) findViewById(edu.cmu.pocketsphinx.demo.wear.R.id.caption_text))
+        ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
 
         // Check if user has given permission to record audio
@@ -65,6 +66,7 @@ public class WearActivity extends Activity implements
         runRecognizerSetup();
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void runRecognizerSetup() {
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task

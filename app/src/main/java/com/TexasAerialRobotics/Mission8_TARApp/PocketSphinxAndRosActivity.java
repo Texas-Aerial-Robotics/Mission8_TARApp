@@ -28,7 +28,7 @@
  * ====================================================================
  */
 
-package edu.cmu.pocketsphinx.demo;
+package com.TexasAerialRobotics.Mission8_TARApp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -64,7 +64,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
 
-public class PocketSphinxActivity extends RosActivity implements
+public class PocketSphinxAndRosActivity extends RosActivity implements
         RecognitionListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
@@ -86,7 +86,7 @@ public class PocketSphinxActivity extends RosActivity implements
     @SuppressLint("StaticFieldLeak")
     private static TextView textbox;
 
-    public PocketSphinxActivity() {
+    public PocketSphinxAndRosActivity() {
         super("TARAndroidApp", "Running");
     }
 
@@ -104,7 +104,7 @@ public class PocketSphinxActivity extends RosActivity implements
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                PocketSphinxActivity.this.init(nodeMainExecutorService);
+                PocketSphinxAndRosActivity.this.init(nodeMainExecutorService);
                 return null;
             }
         }.execute();
@@ -148,8 +148,8 @@ public class PocketSphinxActivity extends RosActivity implements
 
     //this is for loading the language, which takes a while, so it runs in a different thread
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
-        WeakReference<PocketSphinxActivity> activityReference;
-        SetupTask(PocketSphinxActivity activity) {
+        WeakReference<PocketSphinxAndRosActivity> activityReference;
+        SetupTask(PocketSphinxAndRosActivity activity) {
             this.activityReference = new WeakReference<>(activity);
         }
 
@@ -323,7 +323,7 @@ public class PocketSphinxActivity extends RosActivity implements
     public void onStop() {
         onDestroy();
         super.onStop();
-        Intent intent = new Intent(this, PocketSphinxActivity.class);
+        Intent intent = new Intent(this, PocketSphinxAndRosActivity.class);
         startActivity(intent);
     }
 }
