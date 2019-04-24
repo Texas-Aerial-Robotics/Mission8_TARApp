@@ -39,22 +39,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
-import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -93,23 +89,7 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
     @SuppressLint("StaticFieldLeak")
     @Override
     public void startMasterChooser() {
-        new checkPorts().execute();
-
-        URI uri;
-        try {
-            uri = new URI("http://192.168.1.24:11311/");
-        } catch (URISyntaxException e) {
-            throw new RosRuntimeException(e);
-        }
-
-        nodeMainExecutorService.setMasterUri(uri);
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                PocketSphinxAndRosActivity.this.init(nodeMainExecutorService);
-                return null;
-            }
-        }.execute();
+        init(nodeMainExecutorService);
     }
 
     @Override
@@ -118,6 +98,7 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
 
         // Prepare the data for UI
         captions = new HashMap<>();
+        // Should have a restart app voice command to reconnect to drones (call onStop() or init() again)
         captions.put(KWS_SEARCH, R.string.kws_caption);
         captions.put(MENU_SEARCH, R.string.menu_caption);
         setContentView(R.layout.main);
@@ -205,15 +186,39 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        RosPublisher publishNode = new RosPublisher();
-        RosSubscriber subscribeNode = new RosSubscriber();
+        RosPublisher Drone1PubNode = new RosPublisher();
+        RosSubscriber Drone1SubNode = new RosSubscriber();
+        RosPublisher Drone2PubNode = new RosPublisher();
+        RosSubscriber Drone2SubNode = new RosSubscriber();
 
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(
+        NodeConfiguration Drone1Pub = NodeConfiguration.newPublic(
                 InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration.setMasterUri(getMasterUri());
+        try {Drone1Pub.setMasterUri(new URI("http://192.168.1.24:11311/"));}
+            catch (URISyntaxException ignored) {}
+        Drone1Pub.setNodeName("TARAppDrone1Pub");
 
-        nodeMainExecutor.execute(publishNode, nodeConfiguration);
-        nodeMainExecutor.execute(subscribeNode, nodeConfiguration);
+        NodeConfiguration Drone1Sub = NodeConfiguration.newPublic(
+                InetAddressFactory.newNonLoopback().getHostAddress());
+        try {Drone1Sub.setMasterUri(new URI("http://192.168.1.24:11311/"));}
+            catch (URISyntaxException ignored) {}
+        Drone1Sub.setNodeName("TARAppDrone1Sub");
+
+        NodeConfiguration Drone2Pub = NodeConfiguration.newPublic(
+                InetAddressFactory.newNonLoopback().getHostAddress());
+        try {Drone2Pub.setMasterUri(new URI("http://192.168.1.24:11811/"));}
+            catch (URISyntaxException ignored) {}
+        Drone2Pub.setNodeName("TARAppDrone2Pub");
+
+        NodeConfiguration Drone2Sub = NodeConfiguration.newPublic(
+                InetAddressFactory.newNonLoopback().getHostAddress());
+        try {Drone2Sub.setMasterUri(new URI("http://192.168.1.24:11811/"));}
+            catch (URISyntaxException ignored) {}
+        Drone2Sub.setNodeName("TARAppDrone2Sub");
+
+        nodeMainExecutor.execute(Drone1PubNode, Drone1Pub);
+        nodeMainExecutor.execute(Drone1SubNode, Drone1Sub);
+        nodeMainExecutor.execute(Drone2PubNode, Drone2Pub);
+        nodeMainExecutor.execute(Drone2SubNode, Drone2Sub);
         ((TextView) findViewById(R.id.connection_status)).setText("Connected");
     }
 
@@ -327,24 +332,5 @@ public class PocketSphinxAndRosActivity extends RosActivity implements
         super.onStop();
         Intent intent = new Intent(this, PocketSphinxAndRosActivity.class);
         startActivity(intent);
-    }
-
-    private static class checkPorts extends AsyncTask<Integer, Integer, Integer> {
-        checkPorts() {}
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            for (int subnet2 = 0; subnet2 < 4; subnet2++) {
-                for (int subnet = 0; subnet < 255; subnet++) {
-                    @SuppressLint("DefaultLocale") String server = String.format("192.168.%d.%d", subnet2, subnet);
-                    try (Socket socket = new Socket()) {
-                        socket.connect(new InetSocketAddress(server, 11311), 3);
-                        Log.i("Network","found ROS Node: " + server + " == " + socket.isConnected());
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-            return 1;
-        }
     }
 }
